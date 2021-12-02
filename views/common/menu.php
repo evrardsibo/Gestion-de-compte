@@ -9,6 +9,9 @@
           <a class="nav-link" aria-current="page" href="<?= URL; ?>accueil">Accueil</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" aria-current="page" href="<?= URL; ?>login">Login</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="<?= URL; ?>page1">page1</a>
         </li>
         <li class="nav-item dropdown">

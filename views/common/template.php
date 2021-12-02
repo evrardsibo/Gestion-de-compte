@@ -17,7 +17,8 @@
 <body>
     <?php require_once("views/common/header.php"); ?>
 
-    <div class="container">
+    <div class="container"> 
+        <!-- partie contenu du site -->
         <?php 
             if(!empty($_SESSION['alert'])) {
                 foreach($_SESSION['alert'] as $alert){
@@ -28,7 +29,8 @@
                 unset($_SESSION['alert']);
             }
         ?>
-        <?= $page_content; ?>
+        <?= $page_content; ?> 
+        <!-- permet d'afficher le contenu de la views qui est recuper -->
     </div>
 
     <?php require_once("views/common/footer.php"); ?>
