@@ -11,4 +11,14 @@ class Toolbox {
             "type" => $type
         ];
     }
+
+     // fnction static pour envoyer un mail da validation avec la function mail() de php
+     public static function sendMail($destinataire, $sujet, $message){
+        $headers = "From: evrard.sibomana@gmail.com";
+        if(mail($destinataire,$sujet,$message,$headers)){
+            self::ajouterMessageAlerte("Mail envoyé", self::COULEUR_VERTE);
+        } else {
+            self::ajouterMessageAlerte("Mail non envoyé", self::COULEUR_ROUGE);
+        }
+    }
 }

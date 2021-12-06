@@ -1,4 +1,1 @@
-
- <?php foreach($utilisateurs as $utilisateur) 
-   echo $utilisateur['login'] . ' ' . $utilisateur['mail']
- ?>
+<h1>Page d'accueil</h1>

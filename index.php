@@ -5,8 +5,11 @@ define("URL", str_replace("index.php","",(isset($_SERVER['HTTPS'])? "https" : "h
 "://".$_SERVER['HTTP_HOST'].$_SERVER["PHP_SELF"])); // constant URL pour que tout le fichier ponter sur la racine
 
 require_once("./controllers/Visiteur/visiteur.controller.php");
+require_once("controllers/Utilisateur/utilisateur.controller.php");
+require_once('controllers/Toolbox.class.php');
+require_once('controllers/securite.class.php');
 $visiteurController = new VisiteurController(); // controller pour pilote tout le pages du site
-
+$utlisateurController = new UlitisateurController();
 try {
     if(empty($_GET['page'])){
         // gestion de routage
@@ -22,15 +25,65 @@ try {
         break;
         case "login" : $visiteurController->login();
         break;
-        case "validation_login" : echo $_POST['login'] . ' ' . $_POST['password'] ;
+        case "register" : $visiteurController->register();
         break;
-        case "compte" : 
-            switch($url[1]){
-                case "profil": $visiteurController->accueil();
-                break;
+        case "validation_login" : 
+            if(!empty($_POST['login']) && !empty($_POST['password']))
+            {
+                $login = Securite::secureHTML($_POST['login']);
+                $password = Securite::secureHTML($_POST['password']);
+                $utlisateurController->validation_login($login, $password);
+            }else
+            {
+                Toolbox::ajouterMessageAlerte('Login ou mot de passe non reseigne',Toolbox::COULEUR_ROUGE);
+                header('Location:' . URL . 'login'); // lerouter en php on utliser header
             }
         break;
-        default : throw new Exception("La page n'existe pas"); //expection
+        case "validation_creerCompte" : 
+            if(!empty($_POST['login']) && !empty($_POST['password']) && !empty($_POST['mail']))
+            {
+                $login = Securite::secureHTML($_POST['login']);
+                $password = Securite::secureHTML($_POST['password']);
+                $mail = Securite::secureHTML($_POST['mail']);
+                $utlisateurController->validation_creerCompte($login,$password,$mail);
+
+            }else
+            {
+                Toolbox::ajouterMessageAlerte('Veuillez remplir tous champs !',Toolbox::COULEUR_ROUGE);
+                header('Location:' . URL . 'register');
+            };
+            
+        break;
+        case "renvoyerMailValidation" : $utlisateurController->renvoyerMailValidation($url[1]);
+        break;
+        case "validationMail" : $utlisateurController->validationMailComptre($url[1],$url[2]);
+        break;
+
+        case "compte" : 
+            if(!Securite::estConnect())
+            {
+                Toolbox::ajouterMessageAlerte('Veuillez vous connecter !',Toolbox::COULEUR_ROUGE);
+                header('location:'.URL.'login');
+
+            }else
+            {
+
+                switch($url[1]){
+                    case "profil": $utlisateurController->profil();
+                    break;
+                    case "deconecte": $utlisateurController->deconnexion();
+                    break;
+                    case "validation_modification": $utlisateurController->validation_modificationMail(Securite::secureHTML($_POST['mail']));
+                    break;
+                    case "modifPassword": $utlisateurController->modificationPassword();
+                    break;
+                    case "validation_Password": echo "test"; //$utlisateurController->validation_Password();
+                    break;
+                    default : throw new Exception("La page n'existe pas");
+                }
+            }
+        break;
+        default : throw new Exception("La page n'existe pas"); //expection traite erreur
     }
 } catch (Exception $e){
     $visiteurController->pageErreur($e->getMessage()); //page pour gerer les erreurs

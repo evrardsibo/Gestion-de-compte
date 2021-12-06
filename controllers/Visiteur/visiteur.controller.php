@@ -14,15 +14,12 @@ class VisiteurController extends MainController
     //Propriété "page_css" : tableau permettant d'ajouter des fichiers CSS spécifiques
     //Propriété "page_javascript" : tableau permettant d'ajouter des fichiers JavaScript spécifiques
     public function accueil(){
-
-        $utilisateurs = $this->visiteurManager->getUtilisateurs();
         
         // Toolbox::ajouterMessageAlerte("test", Toolbox::COULEUR_VERTE);
         //echo password_hash('EVR1082van',PASSWORD_DEFAULT);
         $data_page = [
             "page_description" => "Description de la page d'accueil",
             "page_title" => "Titre de la page d'accueil",
-            "utilisateurs" => $utilisateurs,
             "view" => "views/visiteur/accueil.view.php",
             "template" => "views/common/template.php"
         ];
@@ -37,6 +34,18 @@ class VisiteurController extends MainController
             "template" => "views/common/template.php"
         ];
         $this->genererPage($data_page);  // pour generer les pages
+    }
+
+    public function register()
+    {
+        $data_page = [
+            "page_description" => "Page creer compte",
+            "page_title" => "Page creer compte",
+            "view" => "views/visiteur/register.view.php",
+            "template" => "views/common/template.php"
+        ];
+        $this->genererPage($data_page);
+
     }
 
     public function pageErreur($msg)
