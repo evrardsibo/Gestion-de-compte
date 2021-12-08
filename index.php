@@ -58,7 +58,6 @@ try {
         break;
         case "validationMail" : $utlisateurController->validationMailComptre($url[1],$url[2]);
         break;
-
         case "compte" : 
             if(!Securite::estConnect())
             {
@@ -77,12 +76,36 @@ try {
                     break;
                     case "modifPassword": $utlisateurController->modificationPassword();
                     break;
-                    case "validation_Password": echo "test"; //$utlisateurController->validation_Password();
+                    case "suppcompte": $utlisateurController->suppressionCompte();
+                    break;
+                    case "validation_Password":
+                        if(!empty($_POST['oldpassword']) && !empty($_POST['newpassword'])  && !empty($_POST['confirmpassword'])){
+                                $oldpassword = Securite::secureHTML($_POST['oldpassword']);
+                                $newpassword = Securite::secureHTML($_POST['newpassword']);
+                                $confirmpassword = Securite::secureHTML($_POST['confirmpassword']);
+                                $utlisateurController->validation_Password($oldpassword, $newpassword, $confirmpassword);
+                            
+                        }else{
+                            Toolbox::ajouterMessageAlerte('veillez resegnie tous les champs',Toolbox::COULEUR_ROUGE);
+                            header('Location:'.URL.'compte/modifPassword');
+                        };
+                    break;
+                    // print_r($_FILES['image']) pour voir l information qui a ete recuperer dans le file
+                    case 'modificationPhoto' :
+                        if($_FILES['image']['size'] > 0)
+                        {
+                            $utlisateurController->modifPhoto($_FILES['image']);
+                        }else
+                        {
+                            Toolbox::ajouterMessageAlerte('veuillez ajoute une image',Toolbox::COULEUR_ROUGE);
+                            header('Location:'.URL.'compte/profil');
+                        } ;
                     break;
                     default : throw new Exception("La page n'existe pas");
                 }
             }
         break;
+
         default : throw new Exception("La page n'existe pas"); //expection traite erreur
     }
 } catch (Exception $e){

@@ -70,7 +70,7 @@ class UlitisateurController extends MainController
         {
             $passwordCrypte = password_hash($password,PASSWORD_DEFAULT);
             $clef = rand(0,9999);
-            if($this->UtilisateurManager->bdCreercompte($login,$passwordCrypte,$mail,$clef))
+            if($this->UtilisateurManager->bdCreercompte($login,$passwordCrypte,$mail,$clef,'profils/profil.jpg'))
             {
                 $this->sendMailValidation($login,$mail,$clef);
                 Toolbox::ajouterMessageAlerte('La commpte a ete bien creé , un mail de validation vous a ete envoyer',Toolbox::COULEUR_VERTE);
@@ -141,6 +141,96 @@ class UlitisateurController extends MainController
                 "template" => "views/common/template.php"
             ];
             $this->genererPage($data_page); 
+        }
+
+        public function validation_Password($oldpassword, $newpassword, $confirmpassword)
+        {
+            if($newpassword === $confirmpassword)
+            {
+                // function iscombinaison pour voir si le passeword existe dans la bd surtout da la session
+                if($this->UtilisateurManager->isCombinaisonValide($_SESSION['profil']['login'],$oldpassword))
+                {
+                    $passwordCrypte = password_hash($newpassword,PASSWORD_DEFAULT);
+                    if($this->UtilisateurManager->modifBdPassWord($_SESSION['profil']['login'], $passwordCrypte))
+                    {
+                        Toolbox::ajouterMessageAlerte('mot de passe modifier',Toolbox::COULEUR_VERTE);
+                        header('Location:'.URL. 'login'); 
+                    }else
+                    {
+                        Toolbox::ajouterMessageAlerte('erreur de modification',Toolbox::COULEUR_ROUGE);
+                        header('Location:'.URL. 'compte/modifPassword'); 
+                    }
+
+                }else
+                {
+                    Toolbox::ajouterMessageAlerte('ancien mot de passe incorrecte',Toolbox::COULEUR_ROUGE);
+                    header('Location:'.URL. 'compte/modifPassword'); 
+                }
+            }else
+            {
+                Toolbox::ajouterMessageAlerte('mot de passe ne sont indentique',Toolbox::COULEUR_ROUGE);
+                header('Location:'.URL. 'compte/modifPassword');
+            }
+        }
+        public function suppressionCompte()
+        {
+            // ca va supprime en meme temps le profil et l'image
+            $this->dossierSupprime($_SESSION['profil']['login']);
+            // pour supprime le dossier aussi
+
+            rmdir('public/Assets/images/profils/'.$_SESSION['profil']['login']);
+            if($this->UtilisateurManager->suppBdCompte($_SESSION['profil']['login']))
+            {
+                Toolbox::ajouterMessageAlerte('compte bien supprime',Toolbox::COULEUR_VERTE);
+                $this->deconnexion();
+            }else
+            {
+                Toolbox::ajouterMessageAlerte('compte non supprime',Toolbox::COULEUR_ROUGE);
+                header('Location:'.URL.'compte/profil');
+            }
+        }
+
+        public function modifPhoto($file)
+        {
+            try
+            {
+                // pour creer une repertoire de profil pour chaque utilisateur et / pour indique que c'est un repertoire
+               $repertoire = "public/Assets/images/profils/".$_SESSION['profil']['login'].'/';
+               $recupimage = Toolbox::ajoutImage($file,$repertoire);
+               // pour enregistre dans la bd le chemin complet 
+               $recupimagebd = "profils/".$_SESSION['profil']['login'].'/' . $recupimage ;
+               // pour que quand on supprime le profil le dossier soit supprime aussi
+               $this->dossierSupprime($_SESSION['profil']['login']);
+               if($this->UtilisateurManager->modifImageBd($_SESSION['profil']['login'],$recupimagebd))
+               {
+                    Toolbox::ajouterMessageAlerte('profil bien modifie',Toolbox::COULEUR_VERTE);
+                    
+               }else
+               {
+                   Toolbox::ajouterMessageAlerte('profil non modifie',Toolbox::COULEUR_ROUGE);
+                   
+               }
+            }catch(Exception $e)
+            {
+                Toolbox::ajouterMessageAlerte($e->getMessage(),Toolbox::COULEUR_ROUGE);
+            }
+           header('Location:'.URL.'compte/profil');
+            
+
+        }
+
+        private function dossierSupprime($login)
+        {
+                 // variable pour recuper l'ancien image de profil et le supprime
+                 $oldimage = $this->UtilisateurManager->getImageutlisateur($_SESSION['profil']['login']);
+                 //condition pour supprime l'ancien profil dans la repertoire et mettre le nouveau
+ 
+             if($oldimage !== 'profils/profil.jpg')
+             {
+                 // function pour supprimer l'image dans le dossier voir chemin
+ 
+                 unlink('public/Assets/images/' . $oldimage );
+             }
         }
 
     public function pageErreur($msg)

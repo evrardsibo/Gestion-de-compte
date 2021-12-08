@@ -45,15 +45,16 @@ require_once('models/MainManager.model.php');
         return $reuslt;
     }
 
-    public function bdCreercompte($login,$passwordCrypte,$mail,$clef)
+    public function bdCreercompte($login,$passwordCrypte,$mail,$clef,$image)
     {
         $req = "INSERT INTO utilisateur (login,mail,password,est_valide,clef,image,role)
-                VALUES (:login,:mail,:password,0,:clef,'','utilisateur')";
+                VALUES (:login,:mail,:password,0,:clef,:image,'utilisateur')";
         $stmt = $this->getBdd()->prepare($req); //aller chercher la connection a la bdd
         $stmt->bindValue(":login",$login,PDO::PARAM_STR);
         $stmt->bindValue(":mail",$mail,PDO::PARAM_STR);
         $stmt->bindValue(":password",$passwordCrypte,PDO::PARAM_STR); 
         $stmt->bindValue(":clef",$clef,PDO::PARAM_INT);
+        $stmt->bindValue(":image",$image,PDO::PARAM_STR);
         $stmt->execute(); 
         $estModifier = ($stmt->rowcount() > 0); // verifier le nombre de ligne ajoiter en bd voir aussi si le arequette a bien fonctionne
         $stmt->closeCursor();
@@ -91,6 +92,51 @@ require_once('models/MainManager.model.php');
         $estModifier = ($stmt->rowcount() > 0); // verifier le nombre de ligne ajoiter en bd voir aussi si le arequette a bien fonctionne
         $stmt->closeCursor();
         return $estModifier;
+    }
+
+    public function modifBdPassWord($login,$newpassword)
+    {
+        $req = "UPDATE utilisateur SET password = :password WHERE login = :login";
+        $stmt = $this->getBdd()->prepare($req); //aller chercher la connection a la bdd
+        $stmt->bindValue(":login",$login,PDO::PARAM_STR);
+        $stmt->bindValue(":password",$newpassword,PDO::PARAM_STR);
+        $stmt->execute(); 
+        $estModifier = ($stmt->rowcount() > 0); // verifier le nombre de ligne ajoiter en bd voir aussi si le arequette a bien fonctionne
+        $stmt->closeCursor();
+        return $estModifier;
+    }
+    public function suppBdCompte($login)
+    {
+        $req = "DELETE FROM utilisateur WHERE login = :login";
+        $stmt = $this->getBdd()->prepare($req); //aller chercher la connection a la bdd
+        $stmt->bindValue(":login",$login,PDO::PARAM_STR);
+        $stmt->execute(); 
+        $estModifier = ($stmt->rowcount() > 0); // verifier le nombre de ligne ajoiter en bd voir aussi si le arequette a bien fonctionne
+        $stmt->closeCursor();
+        return $estModifier;
+    }
+    
+    public function modifImageBd($login,$image)
+    {
+        $req = "UPDATE utilisateur SET image = :image WHERE login = :login";
+        $stmt = $this->getBdd()->prepare($req); //aller chercher la connection a la bdd
+        $stmt->bindValue(":login",$login,PDO::PARAM_STR);
+        $stmt->bindValue(":image",$image,PDO::PARAM_STR);
+        $stmt->execute(); 
+        $estModifier = ($stmt->rowcount() > 0); // verifier le nombre de ligne ajoiter en bd voir aussi si le arequette a bien fonctionne
+        $stmt->closeCursor();
+        return $estModifier; 
+    }
+
+    public function getImageutlisateur($login)
+    {
+        $req = "SELECT image FROM utilisateur WHERE login = :login";
+        $stmt = $this->getBdd()->prepare($req);
+        $stmt->bindValue(":login",$login,PDO::PARAM_STR); // pour securise la requette pour eviter les injection sql
+        $stmt->execute();
+        $reuslt = $stmt->fetch(PDO::FETCH_ASSOC); // pour eviter de duplique les donnees
+        $stmt->closeCursor();
+        return $reuslt ['image'];
     }
 
  } 
