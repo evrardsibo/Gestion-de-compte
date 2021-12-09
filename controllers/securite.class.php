@@ -31,7 +31,7 @@
     {
         $ticket = session_id().microtime().rand(0,9999999);
         $ticket = hash('sha512',$ticket);
-        setcookie(self::COOkIE_NAME,$ticket,time()+(60*1));
+        setcookie(self::COOkIE_NAME,$ticket,time()+(60*30));
         $_SESSION['profil'][self::COOkIE_NAME] = $ticket;
     }
 
