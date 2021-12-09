@@ -45,16 +45,18 @@ require_once('models/MainManager.model.php');
         return $reuslt;
     }
 
-    public function bdCreercompte($login,$passwordCrypte,$mail,$clef,$image)
+    public function bdCreercompte($login,$passwordCrypte,$mail,$clef,$image,$role)
     {
         $req = "INSERT INTO utilisateur (login,mail,password,est_valide,clef,image,role)
-                VALUES (:login,:mail,:password,0,:clef,:image,'utilisateur')";
+                VALUES (:login,:mail,:password,0,:clef,:image,:role)";
         $stmt = $this->getBdd()->prepare($req); //aller chercher la connection a la bdd
         $stmt->bindValue(":login",$login,PDO::PARAM_STR);
         $stmt->bindValue(":mail",$mail,PDO::PARAM_STR);
         $stmt->bindValue(":password",$passwordCrypte,PDO::PARAM_STR); 
         $stmt->bindValue(":clef",$clef,PDO::PARAM_INT);
         $stmt->bindValue(":image",$image,PDO::PARAM_STR);
+        // bindValue pour securise les roquettes est dire que :role va recuper le paramertes de $role
+        $stmt->bindValue(":role",$role,PDO::PARAM_STR); 
         $stmt->execute(); 
         $estModifier = ($stmt->rowcount() > 0); // verifier le nombre de ligne ajoiter en bd voir aussi si le arequette a bien fonctionne
         $stmt->closeCursor();

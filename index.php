@@ -8,8 +8,10 @@ require_once("./controllers/Visiteur/visiteur.controller.php");
 require_once("controllers/Utilisateur/utilisateur.controller.php");
 require_once('controllers/Toolbox.class.php');
 require_once('controllers/securite.class.php');
+require_once('./controllers/Administrateur/admin.controller.php');
 $visiteurController = new VisiteurController(); // controller pour pilote tout le pages du site
 $utlisateurController = new UlitisateurController();
+$adminController = new adminController();
 try {
     if(empty($_GET['page'])){
         // gestion de routage
@@ -64,8 +66,18 @@ try {
                 Toolbox::ajouterMessageAlerte('Veuillez vous connecter !',Toolbox::COULEUR_ROUGE);
                 header('location:'.URL.'login');
 
-            }else
+            }elseif(!Securite::checkCookieConnexion())
             {
+                Toolbox::ajouterMessageAlerte('Veuillez vous reconnecter !',Toolbox::COULEUR_ROUGE);
+                //supprime le profil dans la session
+                setcookie(Securite::COOkIE_NAME,"",time() - 3600);
+                unset($_SESSION['profil']);
+                header('location:'.URL.'login');
+            }
+            else
+            {
+                // regeneration du cookie pour evite que l'utilisateur soit oblige de se connecte tous le 20min
+                Securite::genereCookieConnexion();
 
                 switch($url[1]){
                     case "profil": $utlisateurController->profil();
@@ -104,6 +116,29 @@ try {
                     default : throw new Exception("La page n'existe pas");
                 }
             }
+        break;
+
+        case 'administration' :
+            if(!Securite::estConnect())
+            {
+                Toolbox::ajouterMessageAlerte('Veuillez vous connecte',Toolbox::COULEUR_ROUGE);
+                header('Location:'.URL.'login');
+            }elseif(!Securite::isAdmin())
+            {
+                Toolbox::ajouterMessageAlerte('vous n\'avez pas les droits',Toolbox::COULEUR_ROUGE);
+                header('Location:'.URL.'accueil');
+            }else
+            {
+                switch($url[1])
+                {
+                    case 'droits' : $adminController->droits();
+                    break;
+                    case 'validation_role' : $adminController->validationRole($_POST['login'],$_POST['role']);
+                    break;
+                    default : throw new Exception('La page n\'existe pas');   
+                }
+            }
+
         break;
 
         default : throw new Exception("La page n'existe pas"); //expection traite erreur

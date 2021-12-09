@@ -8,7 +8,8 @@
         <li class="nav-item">
           <a class="nav-link" aria-current="page" href="<?= URL; ?>accueil">Accueil</a>
         </li>
-        <?php if(empty($_SESSION['profil'])) : ?>
+        <!-- cette function static pour voir si l'utilisateur n'est pas connecte  -->
+        <?php if(!Securite::estConnect()) : ?>
         <li class="nav-item">
           <a class="nav-link" aria-current="page" href="<?= URL; ?>login">Login</a>
         </li>
@@ -23,19 +24,16 @@
           <a class="nav-link" aria-current="page" href="<?= URL; ?>compte/deconecte">Logout</a>
         </li>
         <?php endif ; ?>
-        
-        <li class="nav-item">
-          <a class="nav-link" href="<?= URL; ?>page1">page1</a>
-        </li>
+        <?php if(Securite::estConnect() && Securite::isAdmin()) : ?>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Liste déroulante
+            Administration
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="<?= URL; ?>compte/profil">page2</a></li>
-            <li><a class="dropdown-item" href="<?= URL; ?>page3">page3</a></li>
+            <li><a class="dropdown-item" href="<?= URL; ?>administration/droits">Gerer les droits</a></li>
           </ul>
         </li>
+        <?php endif ?>
       </ul>
     </div>
   </div>

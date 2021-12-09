@@ -25,6 +25,8 @@ class UlitisateurController extends MainController
                 $_SESSION['profil'] = [
                     'login' => $login
                 ];
+                Securite::genereCookieConnexion();
+
                 header('Location:' . URL . 'compte/profil');
             }else
             {
@@ -44,7 +46,8 @@ class UlitisateurController extends MainController
     {
         $datas = $this->UtilisateurManager->getUserinformation($_SESSION['profil']['login']);
         //print_r($datas); // voir si on accede au donne
-       // $_SESSION['profil']['role'] = $datas['role'];
+        // pour verifier le role
+        $_SESSION['profil']['role'] = $datas['role'];
         $data_page = [
             "page_description" => "Description profil",
             "page_title" => "Titre de la page de profil",
@@ -60,6 +63,8 @@ class UlitisateurController extends MainController
     {
         Toolbox::ajouterMessageAlerte('Vous etes deconnecté',Toolbox::COULEUR_VERTE);
         unset($_SESSION['profil']);
+        // pour que le cookie expire dans 60min
+        setcookie(Securite::COOkIE_NAME,"",time() - 3600);
         header('location:' . URL . 'accueil');
 
     }
@@ -70,7 +75,7 @@ class UlitisateurController extends MainController
         {
             $passwordCrypte = password_hash($password,PASSWORD_DEFAULT);
             $clef = rand(0,9999);
-            if($this->UtilisateurManager->bdCreercompte($login,$passwordCrypte,$mail,$clef,'profils/profil.jpg'))
+            if($this->UtilisateurManager->bdCreercompte($login,$passwordCrypte,$mail,$clef,'profils/profil.jpg','utilisateur'))
             {
                 $this->sendMailValidation($login,$mail,$clef);
                 Toolbox::ajouterMessageAlerte('La commpte a ete bien creé , un mail de validation vous a ete envoyer',Toolbox::COULEUR_VERTE);
